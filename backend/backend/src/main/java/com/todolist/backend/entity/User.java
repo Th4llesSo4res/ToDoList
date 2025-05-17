@@ -2,6 +2,8 @@ package com.todolist.backend.entity;
 
 import jakarta.persistence.*;
 import java.util.List;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 
 @Entity
 @Table(name = "users") // Evita conflito com palavras reservadas
@@ -18,8 +20,13 @@ public class User {
 
     private String password;
 
+    
+    
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
     private List<Task> tasks;
+
+    
 
     public User() {
     }
