@@ -33,6 +33,19 @@ public class TaskController {
         return taskService.updateTask(id, updatedTask);
     }
 
+    // Marcar tarefa como concluída
+@PutMapping("/{id}/complete")
+public String completeTask(@PathVariable Long id) {
+    Task task = taskService.findById(id);
+    if (task != null) {
+        task.setCompleted(true);
+        taskService.saveTask(task);
+        return "Tarefa marcada como concluída!";
+    } else {
+        return "Tarefa não encontrada.";
+    }
+}
+
     // Deletar tarefa pelo ID
     @DeleteMapping("/{id}")
     public String deleteTask(@PathVariable Long id) {

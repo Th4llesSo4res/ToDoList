@@ -28,6 +28,7 @@ public class TaskService {
         taskRepository.save(task);
     }
 
+
     // Buscar todas as tarefas
     public List<Task> getAllTasks() {
         return taskRepository.findAll();
@@ -45,6 +46,11 @@ public class TaskService {
         return taskRepository.save(existingTask);
     }
 
+    public Task findById(Long id) {
+    return taskRepository.findById(id).orElse(null);
+}
+
+
     // Deletar uma tarefa pelo ID
     public void deleteTask(Long id) {
         if (!taskRepository.existsById(id)) {
@@ -52,4 +58,6 @@ public class TaskService {
         }
         taskRepository.deleteById(id);
     }
+
+    
 }
