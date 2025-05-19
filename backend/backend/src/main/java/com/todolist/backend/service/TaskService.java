@@ -18,26 +18,29 @@ public class TaskService {
     @Autowired
     private UserRepository userRepository;
 
-    // Criar nova tarefa associada a um usuário fixo (ID = 1)
-    public void saveTask(Task task) {
-        // ⚠️ Simula o usuário logado (substituir por JWT no futuro)
-        User user = userRepository.findById(1L)
-                .orElseThrow(() -> new RuntimeException("Usuário com ID 1 não encontrado"));
-        
-        task.setUser(user); // associa a tarefa ao usuário
+    // ✅ Criar tarefa associada ao usuário
+    public void saveTask(Task task, String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Usuário não encontrado com o e-mail: " + email));
+        task.setUser(user);
         taskRepository.save(task);
     }
 
-
-    // Buscar todas as tarefas
-    public List<Task> getAllTasks() {
-        return taskRepository.findAll();
+    // ✅ Buscar tarefas do usuário
+    public List<Task> getTasksByUser(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Usuário não encontrado com o e-mail: " + email));
+        return taskRepository.findByUser(user);
     }
 
-    // Atualizar uma tarefa existente
-    public Task updateTask(Long id, Task updatedTask) {
+    // ✅ Atualizar tarefa (com verificação de dono)
+    public Task updateTask(Long id, Task updatedTask, String email) {
         Task existingTask = taskRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Tarefa não encontrada com id: " + id));
+
+        if (!existingTask.getUser().getEmail().equals(email)) {
+            throw new RuntimeException("Você não tem permissão para atualizar esta tarefa.");
+        }
 
         existingTask.setTitle(updatedTask.getTitle());
         existingTask.setDescription(updatedTask.getDescription());
@@ -46,18 +49,20 @@ public class TaskService {
         return taskRepository.save(existingTask);
     }
 
+    // ✅ Encontrar por ID
     public Task findById(Long id) {
-    return taskRepository.findById(id).orElse(null);
-}
-
-
-    // Deletar uma tarefa pelo ID
-    public void deleteTask(Long id) {
-        if (!taskRepository.existsById(id)) {
-            throw new RuntimeException("Tarefa não encontrada com id: " + id);
-        }
-        taskRepository.deleteById(id);
+        return taskRepository.findById(id).orElse(null);
     }
 
-    
+    // ✅ Deletar (verificando se é do usuário)
+    public void deleteTask(Long id, String email) {
+        Task task = taskRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Tarefa não encontrada"));
+
+        if (!task.getUser().getEmail().equals(email)) {
+            throw new RuntimeException("Você não tem permissão para excluir esta tarefa.");
+        }
+
+        taskRepository.deleteById(id);
+    }
 }
