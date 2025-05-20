@@ -16,22 +16,24 @@ public class AuthController {
     @Autowired
     private JwtUtil jwtUtil;
 
+    // Cadastro
     @PostMapping("/register")
     public String register(@RequestBody User user) {
-        User existing = userService.findByEmail(user.getEmail());
-        if (existing != null) {
+        if (userService.emailExists(user.getEmail())) {
             return "E-mail já cadastrado.";
         }
-        userService.saveUser(user);
+
+        userService.saveUser(user); // salva o novo usuário
         return "Usuário cadastrado com sucesso!";
     }
 
+    // Login
     @PostMapping("/login")
     public String login(@RequestBody User user) {
-        User existing = userService.findByEmail(user.getEmail());
+        User existing = userService.getUserByEmail(user.getEmail());
         if (existing != null && userService.checkPassword(user.getPassword(), existing.getPassword())) {
             String token = jwtUtil.generateToken(existing.getEmail());
-            return "Token gerado: " + token;
+            return token; // retorna só o token (frontend lida com o redirecionamento)
         }
         return "Credenciais inválidas.";
     }
